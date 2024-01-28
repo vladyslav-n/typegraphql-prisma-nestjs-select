@@ -109,7 +109,7 @@ export default function generateRelationsResolverClassesFromModel(
           returnType: `Promise<${field.fieldTSType}>`,
           decorators: [
             {
-              name: "TypeGraphQL.FieldResolver",
+              name: "TypeGraphQL.ResolveField",
               arguments: [
                 `_type => ${field.typeGraphQLType}`,
                 Writers.object({
@@ -129,7 +129,7 @@ export default function generateRelationsResolverClassesFromModel(
               name: "ctx",
               // TODO: import custom `ContextType`
               type: "any",
-              decorators: [{ name: "TypeGraphQL.Ctx", arguments: [] }],
+              decorators: [{ name: "TypeGraphQL.Context", arguments: [] }],
             },
             {
               name: "info",
@@ -155,14 +155,16 @@ export default function generateRelationsResolverClassesFromModel(
           ],
           // TODO: refactor to AST
           statements: [
-            /* ts */ ` const { _count } = transformInfoIntoPrismaArgs(info);
-            return getPrismaFromContext(ctx).${camelCase(
-              model.name,
-            )}.findUniqueOrThrow({
-              where: {${whereConditionString}},
-            }).${field.name}({ ${field.argsTypeName ? "\n...args," : ""}
-              ...(_count && transformCountFieldIntoSelectRelationsCount(_count)),
-            });`,
+            // /* ts */ ` const { _count } = transformInfoIntoPrismaArgs(info);
+            // return getPrismaFromContext(ctx).${camelCase(
+            //   model.name,
+            // )}.findUniqueOrThrow({
+            //   where: {${whereConditionString}},
+            // }).${field.name}({ ${field.argsTypeName ? "\n...args," : ""}
+            //   ...(_count && transformCountFieldIntoSelectRelationsCount(_count)),
+            // });`,
+            // ! CUSTOM CODE
+            /* ts */ ` return ${rootArgName}.${field.name} as ${field.fieldTSType};`,
           ],
         };
       },

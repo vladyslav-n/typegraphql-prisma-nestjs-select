@@ -1,5 +1,5 @@
 {
-  "name": "typegraphql-prisma",
+  "name": "typegraphql-prisma-nestjs-select",
   "version": "0.27.1",
   "scripts": {
     "prepare": "husky install",
@@ -16,7 +16,7 @@
     "format": "prettier --ignore-path ./.cli.prettierignore --write ./**/*.{js,json,ts,tsx}"
   },
   "bin": {
-    "typegraphql-prisma": "lib/generator.js"
+    "typegraphql-prisma-nestjs-select": "lib/generator.js"
   },
   "peerDependencies": {
     "@prisma/client": "^5.0.0",
@@ -71,15 +71,15 @@
     "node": ">=12.4"
   },
   "author": {
-    "name": "Michał Lytek",
-    "url": "https://github.com/MichalLytek"
+    "name": "Vladyslav Nazarenko",
+    "url": "https://github.com/vladyslav-n"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MichalLytek/typegraphql-prisma.git"
+    "url": "https://github.com/vladyslav-n/typegraphql-prisma-nestjs-select.git"
   },
   "bugs": {
-    "url": "https://github.com/MichalLytek/typegraphql-prisma/issues"
+    "url": "https://github.com/vladyslav-n/typegraphql-prisma-nestjs-select/issues"
   },
   "keywords": [
     "type-graphql",
@@ -88,6 +88,7 @@
     "prisma2",
     "prisma-framework",
     "graphql",
+    "nest.js",
     "generator"
   ],
   "lint-staged": {

@@ -30,7 +30,7 @@ export function generateCrudResolverClassMethodDeclaration(
         name: "ctx",
         // TODO: import custom `ContextType`
         type: "any",
-        decorators: [{ name: "TypeGraphQL.Ctx", arguments: [] }],
+        decorators: [{ name: "TypeGraphQL.Context", arguments: [] }],
       },
       {
         name: "info",
@@ -63,21 +63,22 @@ export function generateCrudResolverClassMethodDeclaration(
             });`,
           ]
         : action.kind === DMMF.ModelAction.groupBy
-        ? [
-            /* ts */ ` const { _count, _avg, _sum, _min, _max } = transformInfoIntoPrismaArgs(info);`,
-            /* ts */ ` return getPrismaFromContext(ctx).${mapping.collectionName}.${action.prismaMethod}({
+          ? [
+              /* ts */ ` const { _count, _avg, _sum, _min, _max } = transformInfoIntoPrismaArgs(info);`,
+              /* ts */ ` return getPrismaFromContext(ctx).${mapping.collectionName}.${action.prismaMethod}({
               ...args,
               ...Object.fromEntries(
                 Object.entries({ _count, _avg, _sum, _min, _max }).filter(([_, v]) => v != null)
               ),
             });`,
-          ]
-        : [
-            /* ts */ ` const { _count } = transformInfoIntoPrismaArgs(info);
+            ]
+          : [
+              /* ts */ ` const { _count } = transformInfoIntoPrismaArgs(info);
             return getPrismaFromContext(ctx).${mapping.collectionName}.${action.prismaMethod}({
               ...args,
-              ...(_count && transformCountFieldIntoSelectRelationsCount(_count)),
+              ...ctx.select,
+              // ...(_count && transformCountFieldIntoSelectRelationsCount(_count)),
             });`,
-          ],
+            ],
   };
 }

@@ -22,7 +22,7 @@ import { EmitBlockKind } from "./emit-block";
 
 export function generateTypeGraphQLImport(sourceFile: SourceFile) {
   sourceFile.addImportDeclaration({
-    moduleSpecifier: "type-graphql",
+    moduleSpecifier: "@nestjs/graphql",
     namespaceImport: "TypeGraphQL",
   });
 }

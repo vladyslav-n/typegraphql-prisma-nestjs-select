@@ -80,11 +80,14 @@ function transformModelField(dmmfDocument: DmmfDocument) {
   const { omitInputFieldsByDefault, omitOutputFieldsByDefault } =
     dmmfDocument.options;
   return (field: PrismaDMMF.Field): DMMF.ModelField => {
-    const attributeArgs = parseDocumentationAttributes<{ name: string }>(
-      field.documentation,
-      "field",
-      "field",
-    );
+    const attributeArgs = parseDocumentationAttributes<{
+      name: string;
+      nullable: boolean;
+    }>(field.documentation, "field", "field");
+    if (attributeArgs.nullable !== undefined) {
+      field.isRequired = !attributeArgs.nullable;
+    }
+
     const location =
       field.kind === "enum"
         ? "enumTypes"
