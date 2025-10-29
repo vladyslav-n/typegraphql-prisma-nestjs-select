@@ -4,6 +4,8 @@
     "**/.git/subtree-cache/**": true,
     "**/.hg/store/**": true
   },
-  "editor.codeActionsOnSave": { "source.organizeImports": false },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never"
+  },
   "typescript.tsdk": "node_modules/typescript/lib"
 }
