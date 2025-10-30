@@ -64,123 +64,150 @@ export default function generateObjectTypeClassFromModel(
     generateResolversOutputsImports(sourceFile, [countField.typeGraphQLType]);
   }
 
-  sourceFile.addClass({
-    name: model.typeName,
-    isExported: true,
-    decorators: model.isOmitted.output
-      ? []
-      : [
-          {
-            name: "TypeGraphQL.ObjectType",
-            arguments: [
-              `"${model.typeName}"`,
-              Writers.object({
-                ...(dmmfDocument.options.emitIsAbstract && {
+  const writeClass = (generateOnlyBaseClass: boolean) => {
+    sourceFile.addClass({
+      name: `${model.typeName}${generateOnlyBaseClass ? "Base" : ""}`,
+      isExported: true,
+      decorators: generateOnlyBaseClass
+        ? [
+            {
+              name: "TypeGraphQL.ObjectType",
+              arguments: [
+                `"${model.typeName}"`,
+                Writers.object({
                   isAbstract: "true",
                 }),
-                ...(model.docs && { description: `"${model.docs}"` }),
-                ...(dmmfDocument.options.simpleResolvers && {
-                  simpleResolvers: "true",
-                }),
-              }),
+              ],
+            },
+          ]
+        : model.isOmitted.output
+          ? []
+          : [
+              {
+                name: "TypeGraphQL.ObjectType",
+                arguments: [
+                  `"${model.typeName}"`,
+                  Writers.object({
+                    ...(dmmfDocument.options.emitIsAbstract && {
+                      isAbstract: "true",
+                    }),
+                    ...(model.docs && { description: `"${model.docs}"` }),
+                    ...(dmmfDocument.options.simpleResolvers && {
+                      simpleResolvers: "true",
+                    }),
+                  }),
+                ],
+              },
             ],
-          },
-        ],
-    properties: [
-      ...model.fields.map<OptionalKind<PropertyDeclarationStructure>>(field => {
-        const isOptional =
-          !!field.relationName ||
-          field.isOmitted.output ||
-          (!field.isRequired && field.typeFieldAlias === undefined);
+      extends: !generateOnlyBaseClass ? `${model.typeName}Base` : undefined,
+      properties: !generateOnlyBaseClass
+        ? []
+        : [
+            ...model.fields.map<OptionalKind<PropertyDeclarationStructure>>(
+              field => {
+                const isOptional =
+                  !!field.relationName ||
+                  field.isOmitted.output ||
+                  (!field.isRequired && field.typeFieldAlias === undefined);
 
-        return {
-          name: field.name,
-          type: field.fieldTSType,
-          hasExclamationToken: !isOptional,
-          hasQuestionToken: isOptional,
-          trailingTrivia: "\r\n",
-          decorators: [
-            ...(field.relationName ||
-            field.typeFieldAlias ||
-            field.isOmitted.output
-              ? []
-              : [
+                return {
+                  name: field.name,
+                  type: field.fieldTSType,
+                  hasExclamationToken: !isOptional,
+                  hasQuestionToken: isOptional,
+                  trailingTrivia: "\r\n",
+                  decorators: [
+                    ...(field.relationName ||
+                    field.typeFieldAlias ||
+                    field.isOmitted.output
+                      ? []
+                      : [
+                          {
+                            name: "TypeGraphQL.Field",
+                            arguments: [
+                              `_type => ${field.typeGraphQLType}`,
+                              Writers.object({
+                                nullable: `${isOptional}`,
+                                ...(field.docs && {
+                                  description: `"${field.docs}"`,
+                                }),
+                              }),
+                            ],
+                          },
+                        ]),
+                  ],
+                  ...(field.docs && {
+                    docs: [{ description: `\n${convertNewLines(field.docs)}` }],
+                  }),
+                };
+              },
+            ),
+            ...(shouldEmitCountField
+              ? [
+                  {
+                    name: countField.name,
+                    type: countField.fieldTSType,
+                    hasExclamationToken: countField.isRequired,
+                    hasQuestionToken: !countField.isRequired,
+                    trailingTrivia: "\r\n",
+                    decorators: [
+                      {
+                        name: "TypeGraphQL.Field",
+                        arguments: [
+                          `_type => ${countField.typeGraphQLType}`,
+                          Writers.object({
+                            nullable: `${!countField.isRequired}`,
+                          }),
+                        ],
+                      },
+                    ],
+                  },
+                ]
+              : []),
+          ],
+      getAccessors: !generateOnlyBaseClass
+        ? []
+        : model.fields
+            .filter(
+              field =>
+                field.typeFieldAlias &&
+                !field.relationName &&
+                !field.isOmitted.output,
+            )
+            .map<OptionalKind<GetAccessorDeclarationStructure>>(field => {
+              return {
+                name: field.typeFieldAlias!,
+                returnType: field.fieldTSType,
+                trailingTrivia: "\r\n",
+                decorators: [
                   {
                     name: "TypeGraphQL.Field",
                     arguments: [
                       `_type => ${field.typeGraphQLType}`,
                       Writers.object({
-                        nullable: `${isOptional}`,
+                        nullable: `${!field.isRequired}`,
                         ...(field.docs && { description: `"${field.docs}"` }),
                       }),
                     ],
                   },
-                ]),
-          ],
-          ...(field.docs && {
-            docs: [{ description: `\n${convertNewLines(field.docs)}` }],
-          }),
-        };
-      }),
-      ...(shouldEmitCountField
-        ? [
-            {
-              name: countField.name,
-              type: countField.fieldTSType,
-              hasExclamationToken: countField.isRequired,
-              hasQuestionToken: !countField.isRequired,
-              trailingTrivia: "\r\n",
-              decorators: [
-                {
-                  name: "TypeGraphQL.Field",
-                  arguments: [
-                    `_type => ${countField.typeGraphQLType}`,
-                    Writers.object({
-                      nullable: `${!countField.isRequired}`,
-                    }),
-                  ],
-                },
-              ],
-            },
-          ]
-        : []),
-    ],
-    getAccessors: model.fields
-      .filter(
-        field =>
-          field.typeFieldAlias &&
-          !field.relationName &&
-          !field.isOmitted.output,
-      )
-      .map<OptionalKind<GetAccessorDeclarationStructure>>(field => {
-        return {
-          name: field.typeFieldAlias!,
-          returnType: field.fieldTSType,
-          trailingTrivia: "\r\n",
-          decorators: [
-            {
-              name: "TypeGraphQL.Field",
-              arguments: [
-                `_type => ${field.typeGraphQLType}`,
-                Writers.object({
-                  nullable: `${!field.isRequired}`,
-                  ...(field.docs && { description: `"${field.docs}"` }),
+                ],
+                statements: [
+                  field.isRequired
+                    ? `return this.${field.name};`
+                    : `return this.${field.name} ?? null;`,
+                ],
+                ...(field.docs && {
+                  docs: [{ description: `\n${convertNewLines(field.docs)}` }],
                 }),
-              ],
-            },
-          ],
-          statements: [
-            field.isRequired
-              ? `return this.${field.name};`
-              : `return this.${field.name} ?? null;`,
-          ],
-          ...(field.docs && {
-            docs: [{ description: `\n${convertNewLines(field.docs)}` }],
-          }),
-        };
-      }),
-    ...(model.docs && {
-      docs: [{ description: `\n${convertNewLines(model.docs)}` }],
-    }),
-  });
+              };
+            }),
+      ...(generateOnlyBaseClass &&
+        model.docs && {
+          docs: [{ description: `\n${convertNewLines(model.docs)}` }],
+        }),
+    });
+  };
+
+  writeClass(true);
+  writeClass(false);
 }

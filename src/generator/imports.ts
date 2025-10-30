@@ -131,7 +131,7 @@ export function generateModelsBarrelFile(
       .sort()
       .map<OptionalKind<ExportDeclarationStructure>>(modelName => ({
         moduleSpecifier: `./${modelName}`,
-        namedExports: [modelName],
+        namedExports: [modelName, `${modelName}Base`],
       })),
   );
 }
