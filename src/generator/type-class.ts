@@ -95,7 +95,7 @@ export function generateOutputTypeClassFromType(
     ],
     properties: [
       ...type.fields
-        .filter(field => field.argsTypeName)
+        // .filter(field => !field.argsTypeName)
         .map<OptionalKind<PropertyDeclarationStructure>>(field => ({
           name: field.name,
           type: field.fieldTSType,
