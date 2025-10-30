@@ -1,4 +1,4 @@
-import * as TypeGraphQL from "type-graphql";
+import * as TypeGraphQL from "@nestjs/graphql";
 import * as GraphQLScalars from "graphql-scalars";
 import { Prisma } from "../../../client";
 import { DecimalJSScalar } from "../../scalars";
@@ -7,22 +7,13 @@ import { CreatorCountProblemsArgs } from "./args/CreatorCountProblemsArgs";
 
 @TypeGraphQL.ObjectType("CreatorCount", {})
 export class CreatorCount {
+  @TypeGraphQL.Field(_type => TypeGraphQL.Int, {
+    nullable: false
+  })
   likes!: number;
+
+  @TypeGraphQL.Field(_type => TypeGraphQL.Int, {
+    nullable: false
+  })
   problems!: number;
-
-  @TypeGraphQL.Field(_type => TypeGraphQL.Int, {
-    name: "likes",
-    nullable: false
-  })
-  getLikes(@TypeGraphQL.Root() root: CreatorCount, @TypeGraphQL.Args() args: CreatorCountLikesArgs): number {
-    return root.likes;
-  }
-
-  @TypeGraphQL.Field(_type => TypeGraphQL.Int, {
-    name: "problems",
-    nullable: false
-  })
-  getProblems(@TypeGraphQL.Root() root: CreatorCount, @TypeGraphQL.Args() args: CreatorCountProblemsArgs): number {
-    return root.problems;
-  }
 }

@@ -95,7 +95,7 @@ export function generateOutputTypeClassFromType(
     ],
     properties: [
       ...type.fields
-        .filter(field => !field.argsTypeName)
+        .filter(field => field.argsTypeName)
         .map<OptionalKind<PropertyDeclarationStructure>>(field => ({
           name: field.name,
           type: field.fieldTSType,
@@ -114,47 +114,47 @@ export function generateOutputTypeClassFromType(
             },
           ],
         })),
-      ...type.fields
-        .filter(field => field.argsTypeName)
-        .map<OptionalKind<PropertyDeclarationStructure>>(field => ({
-          name: field.name,
-          type: field.fieldTSType,
-          hasExclamationToken: true,
-          hasQuestionToken: false,
-        })),
+      // ...type.fields
+      //   .filter(field => field.argsTypeName)
+      //   .map<OptionalKind<PropertyDeclarationStructure>>(field => ({
+      //     name: field.name,
+      //     type: field.fieldTSType,
+      //     hasExclamationToken: true,
+      //     hasQuestionToken: false,
+      //   })),
     ],
-    methods: type.fields
-      .filter(field => field.argsTypeName)
-      .map<OptionalKind<MethodDeclarationStructure>>(field => ({
-        name: `get${pascalCase(field.name)}`,
-        returnType: field.fieldTSType,
-        trailingTrivia: "\r\n",
-        decorators: [
-          {
-            name: "TypeGraphQL.Field",
-            arguments: [
-              `_type => ${field.typeGraphQLType}`,
-              Writers.object({
-                name: `"${field.name}"`,
-                nullable: `${!field.isRequired}`,
-              }),
-            ],
-          },
-        ],
-        parameters: [
-          {
-            name: "root",
-            type: type.typeName,
-            decorators: [{ name: "TypeGraphQL.Root", arguments: [] }],
-          },
-          {
-            name: "args",
-            type: field.argsTypeName,
-            decorators: [{ name: "TypeGraphQL.Args", arguments: [] }],
-          },
-        ],
-        statements: [Writers.returnStatement(`root.${field.name}`)],
-      })),
+    // methods: type.fields
+    //   .filter(field => field.argsTypeName)
+    //   .map<OptionalKind<MethodDeclarationStructure>>(field => ({
+    //     name: `get${pascalCase(field.name)}`,
+    //     returnType: field.fieldTSType,
+    //     trailingTrivia: "\r\n",
+    //     decorators: [
+    //       {
+    //         name: "TypeGraphQL.Field",
+    //         arguments: [
+    //           `_type => ${field.typeGraphQLType}`,
+    //           Writers.object({
+    //             name: `"${field.name}"`,
+    //             nullable: `${!field.isRequired}`,
+    //           }),
+    //         ],
+    //       },
+    //     ],
+    //     parameters: [
+    //       {
+    //         name: "root",
+    //         type: type.typeName,
+    //         decorators: [{ name: "TypeGraphQL.Root", arguments: [] }],
+    //       },
+    //       {
+    //         name: "args",
+    //         type: field.argsTypeName,
+    //         decorators: [{ name: "TypeGraphQL.Args", arguments: [] }],
+    //       },
+    //     ],
+    //     statements: [Writers.returnStatement(`root.${field.name}`)],
+    //   })),
   });
 }
 
