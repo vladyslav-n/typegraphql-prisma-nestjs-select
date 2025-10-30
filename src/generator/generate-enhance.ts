@@ -22,10 +22,22 @@ export function generateEnhanceMap(
 ) {
   const hasRelations = relationModels.length > 0;
 
-  sourceFile.addImportDeclaration({
-    moduleSpecifier: "type-graphql",
-    namedImports: ["ClassType"],
-  });
+  // sourceFile.addImportDeclaration({
+  //   moduleSpecifier: "type-graphql",
+  //   namedImports: ["ClassType"],
+  // });
+  sourceFile.addStatements(/* ts */ `/**
+Matches a [\`class\` constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+*/
+export type Constructor<T extends object, Arguments extends unknown[] = any[]> = new (...arguments_: Arguments) => T;
+/**
+
+Matches a [\`class\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+*/
+export type ClassType<T extends object = object, Arguments extends unknown[] = any[]> = Constructor<T, Arguments> & {
+    prototype: T;
+};
+`);
   sourceFile.addImportDeclaration({
     moduleSpecifier: "tslib",
     namespaceImport: "tslib",
