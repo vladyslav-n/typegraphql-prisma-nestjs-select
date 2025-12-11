@@ -187,6 +187,10 @@ export function generateIndexFile(
   hasSomeRelations: boolean,
   blocksToEmit: EmitBlockKind[],
 ) {
+  sourceFile.addStatements(/* ts */ `
+    export type NonEmptyArray<T> = readonly [T, ...T[]] | [T, ...T[]];
+  `);
+
   if (blocksToEmit.includes("enums")) {
     sourceFile.addExportDeclaration({
       moduleSpecifier: `./${enumsFolderName}`,
@@ -249,12 +253,6 @@ export function generateIndexFile(
   sourceFile.addExportDeclarations([
     { moduleSpecifier: `./enhance` },
     { moduleSpecifier: `./scalars` },
-  ]);
-  sourceFile.addImportDeclarations([
-    {
-      moduleSpecifier: `type-graphql`,
-      namedImports: ["NonEmptyArray"],
-    },
   ]);
 
   if (
