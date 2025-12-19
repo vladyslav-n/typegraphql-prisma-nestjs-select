@@ -85,6 +85,7 @@ function transformModelField(dmmfDocument: DmmfDocument) {
       nullable: boolean;
     }>(field.documentation, "field", "field");
     if (attributeArgs.nullable !== undefined) {
+      // @ts-ignore
       field.isRequired = !attributeArgs.nullable;
     }
 
@@ -541,7 +542,10 @@ function getPrismaMethodName(actionKind: DMMF.ModelAction) {
 const ENUM_SUFFIXES = ["OrderByRelevanceFieldEnum", "ScalarFieldEnum"] as const;
 export function transformEnums(dmmfDocument: DmmfDocument) {
   return (
-    enumDef: PrismaDMMF.DatamodelEnum | PrismaDMMF.SchemaEnum,
+    enumDef:
+      | PrismaDMMF.DatamodelEnum
+      | PrismaDMMF.SchemaEnum
+      | PrismaDMMF.DatamodelSchemaEnum,
   ): DMMF.Enum => {
     let modelName: string | undefined = undefined;
     let typeName = enumDef.name;
@@ -552,10 +556,7 @@ export function transformEnums(dmmfDocument: DmmfDocument) {
       modelName = enumDef.name.replace(detectedSuffix, "");
       typeName = `${dmmfDocument.getModelTypeName(modelName)}${detectedSuffix}`;
     }
-    const enumValues = enumDef.values as Array<
-      | PrismaDMMF.DatamodelEnum["values"][number]
-      | PrismaDMMF.SchemaEnum["values"][number]
-    >;
+    const enumValues = "values" in enumDef ? enumDef.values : enumDef.data;
 
     return {
       ...enumDef,
@@ -566,7 +567,11 @@ export function transformEnums(dmmfDocument: DmmfDocument) {
       typeName,
       valuesMap: enumValues.map(enumValue => {
         const enumValueName =
-          typeof enumValue === "string" ? enumValue : enumValue.name;
+          typeof enumValue === "string"
+            ? enumValue
+            : "name" in enumValue
+              ? enumValue.name
+              : enumValue.value;
         return {
           value: enumValueName,
           name:

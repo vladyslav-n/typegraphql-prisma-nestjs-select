@@ -1,8 +1,17 @@
 import { InputOmitSetting } from "../config";
 
-export type ReadonlyDeep<O> = {
-  +readonly [K in keyof O]: ReadonlyDeep<O[K]>;
-};
+type IsAny<T> = unknown extends T
+  ? [keyof T] extends [never]
+    ? false
+    : true
+  : false;
+
+export type ReadonlyDeep<O> =
+  IsAny<O> extends true
+    ? any
+    : {
+        +readonly [K in keyof O]: ReadonlyDeep<O[K]>;
+      };
 
 export namespace DMMF {
   export type Document = ReadonlyDeep<{
